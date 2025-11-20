@@ -5,7 +5,9 @@
       "Bash(find:*)",
       "Bash(npx tsc:*)",
       "Bash(npm run build:*)",
-      "Bash(python3:*)"
+      "Bash(python3:*)",
+      "Bash(node server.js:*)",
+      "Bash(npm start)"
     ],
     "deny": [],
     "ask": []

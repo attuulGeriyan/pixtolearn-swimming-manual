@@ -273,7 +273,7 @@ const seedDatabase = async () => {
     const otherLanguages = languages.filter(lang => lang.code !== 'EN').map(lang => {
       let contentData;
 
-      switch(lang.code) {
+      switch (lang.code) {
         case 'DE': contentData = germanContent; break;
         case 'ES': contentData = spanishContent; break;
         case 'FI': contentData = finnishContent; break;

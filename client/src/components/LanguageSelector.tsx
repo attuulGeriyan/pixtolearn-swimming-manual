@@ -16,6 +16,7 @@ const LanguageSelector: React.FC<LanguageSelectorProps> = ({
   const [languages, setLanguages] = useState<Language[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     const fetchLanguages = async () => {
@@ -36,15 +37,20 @@ const LanguageSelector: React.FC<LanguageSelectorProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const euLanguages = languages.filter((lang) => lang.isEUOfficial);
-  const otherLanguages = languages.filter((lang) => !lang.isEUOfficial);
+  const filteredLanguages = languages.filter(lang =>
+    lang.nativeName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    lang.languageCode.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const euLanguages = filteredLanguages.filter((lang) => lang.isEUOfficial);
+  const otherLanguages = filteredLanguages.filter((lang) => !lang.isEUOfficial);
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex items-center justify-center min-h-[60vh]">
         <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary-500"></div>
-          <p className="mt-4 text-gray-600">{t('loadingLanguages')}</p>
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-primary-200 border-t-primary-600"></div>
+          <p className="mt-4 text-slate-600 font-medium animate-pulse">{t('loadingLanguages')}</p>
         </div>
       </div>
     );
@@ -52,12 +58,15 @@ const LanguageSelector: React.FC<LanguageSelectorProps> = ({
 
   if (error) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="bg-red-50 border border-red-200 rounded-lg p-6 max-w-md">
-          <p className="text-red-800">{error}</p>
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="bg-red-50 border border-red-200 rounded-xl p-8 max-w-md text-center shadow-soft">
+          <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+          </div>
+          <p className="text-red-800 font-medium mb-4">{error}</p>
           <button
             onClick={() => window.location.reload()}
-            className="mt-4 bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 transition"
+            className="bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700 transition shadow-sm font-medium"
           >
             {t('retry')}
           </button>
@@ -67,65 +76,112 @@ const LanguageSelector: React.FC<LanguageSelectorProps> = ({
   }
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100 px-4">
-      <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full p-8 relative">
-        <div className="text-center mb-8">
-          <h2 className="text-3xl font-bold text-gray-800">{t('selectYourLanguage')}</h2>
-        </div>
+    <div className="min-h-[80vh] flex flex-col justify-center max-w-5xl mx-auto animate-fade-in py-12">
+      {/* Hero Section */}
+      <div className="text-center mb-12 space-y-4">
+        <h1 className="text-4xl md:text-5xl font-extrabold text-slate-900 tracking-tight">
+          {t('selectYourLanguage')}
+        </h1>
+        <p className="text-lg text-slate-600 max-w-2xl mx-auto">
+          {t('selectLanguageDescription')}
+        </p>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {/* EU Official Languages */}
-          <div>
-            <h3 className="text-lg font-semibold text-gray-700 mb-4 pb-2 border-b-2 border-primary-500">
-              {t('euOfficialLanguages')}
-            </h3>
-            <div className="grid grid-cols-2 gap-2">
+        {/* Search Bar */}
+        <div className="max-w-md mx-auto mt-8 relative">
+          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <svg className="h-5 w-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+          </div>
+          <input
+            type="text"
+            className="block w-full pl-10 pr-3 py-3 border border-slate-200 rounded-xl leading-5 bg-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition shadow-sm"
+            placeholder="Search language..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+      </div>
+
+      <div className="space-y-12">
+        {/* EU Official Languages */}
+        {euLanguages.length > 0 && (
+          <section>
+            <div className="flex items-center gap-4 mb-6">
+              <h3 className="text-xl font-bold text-slate-800">
+                {t('euOfficialLanguages')}
+              </h3>
+              <div className="h-px bg-slate-200 flex-grow"></div>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
               {euLanguages.map((lang) => (
                 <button
                   key={lang.languageCode}
                   onClick={() => onSelectLanguage(lang.languageCode)}
-                  className={`text-left px-3 py-2 rounded transition-colors ${
-                    selectedLanguage === lang.languageCode
-                      ? 'bg-primary-500 text-white'
-                      : 'hover:bg-gray-100 text-gray-700'
-                  }`}
+                  className={`group relative overflow-hidden p-4 rounded-xl border transition-all duration-200 text-left
+                    ${selectedLanguage === lang.languageCode
+                      ? 'bg-primary-50 border-primary-500 ring-2 ring-primary-200 shadow-md'
+                      : 'bg-white border-slate-200 hover:border-primary-300 hover:shadow-soft-lg hover:-translate-y-1'
+                    }`}
                 >
-                  <span className="font-semibold">{lang.languageCode}</span>{' '}
-                  <span className="text-sm">{lang.nativeName}</span>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className={`text-xs font-bold uppercase tracking-wider px-2 py-1 rounded-md
+                      ${selectedLanguage === lang.languageCode ? 'bg-primary-200 text-primary-800' : 'bg-slate-100 text-slate-600 group-hover:bg-primary-50 group-hover:text-primary-600'}`}>
+                      {lang.languageCode}
+                    </span>
+                    {selectedLanguage === lang.languageCode && (
+                      <svg className="w-5 h-5 text-primary-600" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"></path></svg>
+                    )}
+                  </div>
+                  <span className={`block font-semibold text-lg truncate
+                    ${selectedLanguage === lang.languageCode ? 'text-primary-900' : 'text-slate-700 group-hover:text-primary-700'}`}>
+                    {lang.nativeName}
+                  </span>
                 </button>
               ))}
             </div>
-          </div>
+          </section>
+        )}
 
-          {/* Other Languages */}
-          {otherLanguages.length > 0 && (
-            <div>
-              <h3 className="text-lg font-semibold text-gray-700 mb-4 pb-2 border-b-2 border-primary-500">
-                Other languages
+        {/* Other Languages */}
+        {otherLanguages.length > 0 && (
+          <section>
+            <div className="flex items-center gap-4 mb-6">
+              <h3 className="text-xl font-bold text-slate-800">
+                Other Languages
               </h3>
-              <div className="grid grid-cols-2 gap-2">
-                {otherLanguages.map((lang) => (
-                  <button
-                    key={lang.languageCode}
-                    onClick={() => onSelectLanguage(lang.languageCode)}
-                    className={`text-left px-3 py-2 rounded transition-colors ${
-                      selectedLanguage === lang.languageCode
-                        ? 'bg-primary-500 text-white'
-                        : 'hover:bg-gray-100 text-gray-700'
-                    }`}
-                  >
-                    <span className="font-semibold">{lang.languageCode}</span>{' '}
-                    <span className="text-sm">{lang.nativeName}</span>
-                  </button>
-                ))}
-              </div>
+              <div className="h-px bg-slate-200 flex-grow"></div>
             </div>
-          )}
-        </div>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+              {otherLanguages.map((lang) => (
+                <button
+                  key={lang.languageCode}
+                  onClick={() => onSelectLanguage(lang.languageCode)}
+                  className={`group relative overflow-hidden p-4 rounded-xl border transition-all duration-200 text-left
+                    ${selectedLanguage === lang.languageCode
+                      ? 'bg-primary-50 border-primary-500 ring-2 ring-primary-200 shadow-md'
+                      : 'bg-white border-slate-200 hover:border-primary-300 hover:shadow-soft-lg hover:-translate-y-1'
+                    }`}
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <span className={`text-xs font-bold uppercase tracking-wider px-2 py-1 rounded-md
+                      ${selectedLanguage === lang.languageCode ? 'bg-primary-200 text-primary-800' : 'bg-slate-100 text-slate-600 group-hover:bg-primary-50 group-hover:text-primary-600'}`}>
+                      {lang.languageCode}
+                    </span>
+                  </div>
+                  <span className={`block font-semibold text-lg truncate
+                    ${selectedLanguage === lang.languageCode ? 'text-primary-900' : 'text-slate-700 group-hover:text-primary-700'}`}>
+                    {lang.nativeName}
+                  </span>
+                </button>
+              ))}
+            </div>
+          </section>
+        )}
 
-        <div className="mt-8 text-center text-sm text-gray-500">
-          <p>{t('selectLanguageDescription')}</p>
-        </div>
+        {filteredLanguages.length === 0 && (
+          <div className="text-center py-12">
+            <p className="text-slate-500 text-lg">No languages found matching "{searchTerm}"</p>
+          </div>
+        )}
       </div>
     </div>
   );
