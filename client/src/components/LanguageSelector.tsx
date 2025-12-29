@@ -77,6 +77,15 @@ const LanguageSelector: React.FC<LanguageSelectorProps> = ({
 
   return (
     <div className="min-h-[80vh] flex flex-col justify-center max-w-5xl mx-auto animate-fade-in py-12">
+      {/* Logo */}
+      <div className="absolute top-8 left-8">
+        <img
+          src="/pixtolearn-logo.png"
+          alt="PixToLearn"
+          className="h-12 w-auto"
+        />
+      </div>
+
       {/* Hero Section */}
       <div className="text-center mb-12 space-y-4">
         <h1 className="text-4xl md:text-5xl font-extrabold text-slate-900 tracking-tight">
